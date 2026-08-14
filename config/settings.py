@@ -79,10 +79,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database configuration
-# Uses PostgreSQL if DATABASE_URL is set (e.g. Render / Production), otherwise SQLite
+# Exclusively configured for PostgreSQL (Production & Development)
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
+        default=os.environ.get('DATABASE_URL', 'postgres://postgres:shri2803@127.0.0.1:5432/The_Valory_DB'),
         conn_max_age=600,
         conn_health_checks=True,
     )

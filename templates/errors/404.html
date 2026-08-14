@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}404 Page Not Found — THE VALORY{% endblock %}
+{% block content %}
+<section style="padding: 6rem 0; text-align: center;">
+  <div class="container" style="max-width: 550px;">
+    <div style="font-size: 4rem; color: var(--gold-primary); margin-bottom: 1rem;">🔍 404</div>
+    <h2>Page Not Found</h2>
+    <p style="color: var(--text-muted); margin-top: 1rem; margin-bottom: 2rem;">
+      The requested page could not be located in THE VALORY catalog.
+    </p>
+    <a href="{% url 'products:shop' %}" class="btn btn-gold">Explore Shop Catalog</a>
+  </div>
+</section>
+{% endblock %}

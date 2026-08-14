@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shop Collection — THE VALORY{% endblock %}
+
+{% block content %}
+  <div class="shop-page-wrapper">
+    <!-- SHOP HEADER HERO BANNER -->
+    <div class="shop-header-banner">
+      <div class="container">
+        <span class="shop-subtitle">THE VALORY CATALOG</span>
+        <h1 class="shop-title">{% if selected_category %}{{ selected_category.name }}{% else %}ALL PRODUCTS{% endif %}</h1>
+        <p class="shop-desc">High-density cotton tees, heavyweight hoodies, athletic jerseys, and tailored trackpants.</p>
+      </div>
+    </div>
+
+    <!-- MAIN SHOP CONTENT AREA -->
+    <div class="container py-12">
+      <!-- TOP FILTER & SORT BAR -->
+      <div class="shop-filter-bar">
+        <!-- CATEGORY PILLS -->
+        <div class="category-pills-row">
+          <a href="{% url 'products:shop' %}" class="pill-btn {% if not selected_category %}active{% endif %}">ALL</a>
+          {% for cat in categories %}
+            <a href="{% url 'products:shop' %}?category={{ cat.slug }}" class="pill-btn {% if selected_category and selected_category.id == cat.id %}active{% endif %}">
+              {{ cat.name|upper }}
+            </a>
+          {% endfor %}
+        </div>
+
+        <!-- SORT DROPDOWN -->
+        <div class="sort-wrapper">
+          <form method="GET" action="{% url 'products:shop' %}" id="shopSortForm">
+            {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category.slug }}">{% endif %}
+            {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+            <select name="sort" onchange="document.getElementById('shopSortForm').submit();" class="sort-select">
+              <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>SORT: NEWEST</option>
+              <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>PRICE: LOW TO HIGH</option>
+              <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>PRICE: HIGH TO LOW</option>
+              <option value="name" {% if current_sort == 'name' %}selected{% endif %}>NAME: A-Z</option>
+            </select>
+          </form>
+        </div>
+      </div>
+
+      <!-- ACTIVE SEARCH NOTIFICATION -->
+      {% if search_query %}
+        <div class="search-active-notice">
+          Showing results for: <strong>"{{ search_query }}"</strong>
+          <a href="{% url 'products:shop' %}" class="clear-search-btn">Reset Search ✕</a>
+        </div>
+      {% endif %}
+
+      <!-- PRODUCT GRID -->
+      <div class="fashion-product-grid mt-8">
+        {% for product in products %}
+          <div class="fashion-product-card" data-product-id="{{ product.id }}">
+            <div class="card-media-wrapper">
+              {% if product.is_new_arrival %}
+                <span class="card-tag">NEW</span>
+              {% endif %}
+              <button type="button" class="wishlist-btn" aria-label="Add to Wishlist">♡</button>
+
+              <a href="{% url 'products:product_detail' slug=product.slug %}">
+                <img src="{% if product.primary_image %}{{ product.primary_image }}{% else %}https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop{% endif %}" alt="{{ product.name }}" class="card-img">
+              </a>
+
+              <div class="quickview-hover-bar">
+                <button type="button" class="quickview-trigger-btn" data-product-id="{{ product.id }}">QUICK VIEW</button>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <span class="card-category">{{ product.category.name }}</span>
+              <a href="{% url 'products:product_detail' slug=product.slug %}">
+                <h3 class="card-name">{{ product.name }}</h3>
+              </a>
+              
+              <div class="card-price-row">
+                <span class="card-price">₹{{ product.current_price }}</span>
+                {% if product.discount_price and product.discount_price < product.price %}
+                  <span class="card-price-original">₹{{ product.price }}</span>
+                {% endif %}
+              </div>
+
+              <!-- SIZE BADGES -->
+              <div class="size-picker-row">
+                {% for ps in product.sizes.all %}
+                  <button type="button" class="size-badge {% if forloop.first %}active{% endif %} {% if ps.stock_quantity == 0 %}out-of-stock{% endif %}" data-size="{{ ps.size }}" data-stock="{{ ps.stock_quantity }}">
+                    {{ ps.size }}
+                  </button>
+                {% empty %}
+                  <button type="button" class="size-badge active" data-size="M">M</button>
+                  <button type="button" class="size-badge" data-size="L">L</button>
+                {% endfor %}
+              </div>
+
+              <!-- AJAX ADD TO CART -->
+              <form action="{% url 'cart:add' product.id %}" method="POST" class="ajax-add-cart-form">
+                {% csrf_token %}
+                <input type="hidden" name="size" value="M" class="card-selected-size-input">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-primary card-add-btn">ADD TO CART</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-products-notice" style="grid-column: 1 / -1;">
+            <p>NO PRODUCTS FOUND MATCHING YOUR FILTERS.</p>
+            <a href="{% url 'products:shop' %}" class="btn btn-outline btn-sm mt-4">CLEAR FILTERS</a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- PAGINATION -->
+      {% if products.has_other_pages %}
+        <div class="pagination-wrapper mt-12">
+          {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-link">&laquo; PREV</a>
+          {% endif %}
+
+          <span class="page-current">PAGE {{ products.number }} OF {{ products.paginator.num_pages }}</span>
+
+          {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}{% if selected_category %}&category={{ selected_category.slug }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-link">NEXT &raquo;</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

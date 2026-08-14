@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 4rem 0;">
+  <div class="container" style="max-width: 480px;">
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <div class="subtitle">Account Access</div>
+      <h2>Sign In to THE VALORY</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">Access your orders, tracking information, and profile settings.</p>
+    </div>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 2rem;">
+      
+      <!-- PASSWORD LOGIN FORM -->
+      <form method="POST" action="{% url 'accounts:login' %}" style="margin-bottom: 2rem;">
+        {% csrf_token %}
+        
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          {{ form.email }}
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label class="form-label" style="margin: 0;">Password *</label>
+            <a href="{% url 'accounts:password_reset_request' %}" style="font-size: 0.75rem; color: var(--gold-primary);">Forgot Password?</a>
+          </div>
+          {{ form.password }}
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; padding: 1rem; font-size: 0.9rem;">
+          Sign In
+        </button>
+      </form>
+
+      <!-- DIVIDER -->
+      <div style="text-align: center; position: relative; margin: 1.5rem 0;">
+        <span style="background-color: var(--bg-card); padding: 0 0.75rem; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Or Choose Alternative Login</span>
+        <div style="position: absolute; top: 50%; left: 0; right: 0; border-top: 1px solid var(--border-dark); z-index: -1;"></div>
+      </div>
+
+      <!-- ONE-CLICK EMAIL OTP LOGIN -->
+      <form method="POST" action="{% url 'accounts:request_otp_login' %}" style="margin-bottom: 1.25rem;">
+        {% csrf_token %}
+        <div class="form-group">
+          <input type="email" name="email" placeholder="Enter email for instant OTP login..." class="form-input" required>
+        </div>
+        <button type="submit" class="btn btn-outline" style="width: 100%; padding: 0.8rem; font-size: 0.8rem;">
+          🔑 Send Login OTP to Email
+        </button>
+      </form>
+
+      <!-- GOOGLE OAUTH SIMULATION -->
+      <a href="{% url 'accounts:google_login' %}" class="btn btn-outline" style="width: 100%; padding: 0.8rem; font-size: 0.8rem; text-align: center; border-color: #4285F4; color: #4285F4;">
+        🌐 Sign In with Google Account
+      </a>
+
+      <div style="text-align: center; margin-top: 2rem; border-top: 1px solid var(--border-dark); padding-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+        Don't have an account yet? <a href="{% url 'accounts:signup' %}" style="color: var(--gold-primary); text-decoration: underline; font-weight: 600;">Create Account &rarr;</a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

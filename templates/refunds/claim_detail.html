@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Refund Claim #{{ claim.claim_id }} — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container" style="max-width: 700px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <div>
+        <a href="{% url 'accounts:dashboard' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Dashboard</a>
+        <h2 style="margin-top: 0.5rem;">Refund Claim #{{ claim.claim_id }}</h2>
+      </div>
+
+      <span class="status-badge {% if claim.status == 'APPROVED' %}status-delivered{% elif claim.status == 'REJECTED' %}status-cancelled{% else %}status-dispatched{% endif %}" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+        Status: {{ claim.get_status_display }}
+      </span>
+    </div>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 2rem;">
+      <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 1rem;">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Associated Order:</span>
+        <div style="font-weight: 700; color: var(--gold-primary); font-size: 1.1rem;">
+          <a href="{% url 'orders:detail' order_id=claim.order.order_id %}">Order #{{ claim.order.order_id }} (₹{{ claim.order.total_amount }})</a>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Submitted on {{ claim.requested_at|date:"M d, Y H:i" }}</div>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <h4 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem;">Damage Description</h4>
+        <p style="color: var(--text-main); font-size: 0.95rem;">{{ claim.damage_description }}</p>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <h4 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem;">Unboxing Video Proof</h4>
+        {% if claim.unboxing_video_url %}
+          <a href="{{ claim.unboxing_video_url }}" target="_blank" class="btn btn-outline btn-sm" style="color: var(--gold-primary); border-color: var(--gold-primary);">
+            🎬 Watch Unboxing Video Evidence
+          </a>
+        {% elif claim.unboxing_video_file %}
+          <a href="{{ claim.unboxing_video_file.url }}" target="_blank" class="btn btn-outline btn-sm" style="color: var(--gold-primary); border-color: var(--gold-primary);">
+            🎬 Download Video File
+          </a>
+        {% else %}
+          <p style="color: var(--accent-red); font-size: 0.85rem;">No video link provided.</p>
+        {% endif %}
+      </div>
+
+      {% if claim.admin_notes %}
+        <div style="background-color: rgba(212,175,55,0.05); border: 1px solid var(--border-gold); padding: 1.25rem; margin-top: 1.5rem;">
+          <h4 style="color: var(--gold-primary); font-size: 0.85rem; margin-bottom: 0.25rem;">THE VALORY Verification Team Notes:</h4>
+          <p style="color: var(--text-main); font-size: 0.9rem;">{{ claim.admin_notes }}</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

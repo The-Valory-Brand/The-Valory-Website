@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}THE VALORY — Timeless Elegance | Premium Fashion & Streetwear{% endblock %}
+
+{% block content %}
+  <!-- 1. EDITORIAL HERO SECTION -->
+  <section class="hero-editorial">
+    <div class="hero-bg-wrapper">
+      <img src="{% if hero_banner %}{{ hero_banner.image.url }}{% else %}https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1600&auto=format&fit=crop{% endif %}" alt="THE VALORY Editorial Fashion" class="hero-bg-img">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="container hero-container">
+      <div class="hero-text-box">
+        <span class="hero-subtitle">PREMIUM STREETWEAR</span>
+        <h1 class="hero-headline">TIMELESS<br>ELEGANCE</h1>
+        <p class="hero-description">
+          "Elevated essentials designed for those who move with quiet confidence and bold individuality."
+        </p>
+        <div class="hero-btn-group">
+          <a href="{% url 'products:shop' %}" class="btn btn-primary btn-editorial">SHOP COLLECTION</a>
+          <a href="{% url 'products:shop' %}?category=tees" class="btn btn-outline btn-editorial">EXPLORE TEES</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll-indicator">
+      <span>SCROLL</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- 2. PREMIUM BRAND STATEMENT -->
+  <section class="brand-statement-section">
+    <div class="container">
+      <div class="statement-box">
+        <span class="statement-label">PHILOSOPHY</span>
+        <h2 class="statement-title">BUILT FOR THE BOLD.</h2>
+        <p class="statement-text">
+          THE VALORY creates timeless essentials where refined design meets everyday movement. High-density cotton, luxury fleece, and precision tailoring built for modern confidence.
+        </p>
+        <div class="statement-divider"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SHOP BY CATEGORY (EDITORIAL CARDS) -->
+  <section class="category-editorial-section" id="categories">
+    <div class="container">
+      <div class="section-header-centered">
+        <span class="section-subtitle">CURATED SELECTION</span>
+        <h2 class="section-title">SHOP BY CATEGORY</h2>
+        <div class="gold-line-centered"></div>
+      </div>
+
+      <div class="category-grid">
+        {% for cat in categories %}
+          <a href="{% url 'products:shop' %}?category={{ cat.slug }}" class="category-editorial-card">
+            <img src="{% if cat.image %}{{ cat.image.url }}{% else %}https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=800&auto=format&fit=crop{% endif %}" alt="{{ cat.name }}" class="cat-img">
+            <div class="cat-card-overlay"></div>
+            <div class="cat-card-info">
+              <span class="cat-badge">VALORY COLLECTION</span>
+              <h3 class="cat-name">{{ cat.name|upper }}</h3>
+              <span class="cat-link">EXPLORE &rarr;</span>
+            </div>
+          </a>
+        {% empty %}
+          <div class="empty-products-notice" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem;">
+            <p>NO ACTIVE CATEGORIES AVAILABLE</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. FEATURED PRODUCTS ("THE VALORY EDIT") -->
+  <section class="featured-products-section">
+    <div class="container">
+      <div class="section-header-split">
+        <div>
+          <span class="section-subtitle">FEATURED ESSENTIALS</span>
+          <h2 class="section-title">THE VALORY EDIT</h2>
+        </div>
+        <a href="{% url 'products:shop' %}" class="view-all-link">VIEW ALL PRODUCTS &rarr;</a>
+      </div>
+
+      <div class="fashion-product-grid">
+        {% for product in featured_products %}
+          <div class="fashion-product-card" data-product-id="{{ product.id }}">
+            <div class="card-media-wrapper">
+              {% if product.is_new_arrival %}
+                <span class="card-tag">NEW</span>
+              {% endif %}
+              <button type="button" class="wishlist-btn" aria-label="Add to Wishlist">♡</button>
+
+              <a href="{% url 'products:product_detail' slug=product.slug %}">
+                <img src="{% if product.primary_image %}{{ product.primary_image }}{% else %}https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600&auto=format&fit=crop{% endif %}" alt="{{ product.name }}" class="card-img">
+              </a>
+
+              <div class="quickview-hover-bar">
+                <button type="button" class="quickview-trigger-btn" data-product-id="{{ product.id }}">QUICK VIEW</button>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <span class="card-category">{{ product.category.name }}</span>
+              <a href="{% url 'products:product_detail' slug=product.slug %}">
+                <h3 class="card-name">{{ product.name }}</h3>
+              </a>
+              
+              <div class="card-price-row">
+                <span class="card-price">₹{{ product.current_price }}</span>
+                {% if product.discount_price and product.discount_price < product.price %}
+                  <span class="card-price-original">₹{{ product.price }}</span>
+                {% endif %}
+              </div>
+
+              <!-- SIZE BADGES -->
+              <div class="size-picker-row">
+                {% for ps in product.sizes.all %}
+                  <button type="button" class="size-badge {% if forloop.first %}active{% endif %} {% if ps.stock_quantity == 0 %}out-of-stock{% endif %}" data-size="{{ ps.size }}" data-stock="{{ ps.stock_quantity }}">
+                    {{ ps.size }}
+                  </button>
+                {% empty %}
+                  <button type="button" class="size-badge active" data-size="M">M</button>
+                  <button type="button" class="size-badge" data-size="L">L</button>
+                  <button type="button" class="size-badge" data-size="XL">XL</button>
+                {% endfor %}
+              </div>
+
+              <!-- AJAX ADD TO CART -->
+              <form action="{% url 'cart:add' product.id %}" method="POST" class="ajax-add-cart-form">
+                {% csrf_token %}
+                <input type="hidden" name="size" value="M" class="card-selected-size-input">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-primary card-add-btn">ADD TO CART</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-products-notice">
+            <p>NO FEATURED PRODUCTS AVAILABLE AT THE MOMENT</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. NEW ARRIVALS -->
+  <section class="new-arrivals-section">
+    <div class="container">
+      <div class="section-header-split">
+        <div>
+          <span class="section-subtitle">NEW DROPS</span>
+          <h2 class="section-title">NEW ARRIVALS</h2>
+        </div>
+        <a href="{% url 'products:shop' %}?sort=newest" class="view-all-link">VIEW ALL NEW ARRIVALS &rarr;</a>
+      </div>
+
+      <div class="fashion-product-grid">
+        {% for product in new_arrivals %}
+          <div class="fashion-product-card" data-product-id="{{ product.id }}">
+            <div class="card-media-wrapper">
+              <span class="card-tag">NEW</span>
+              <button type="button" class="wishlist-btn" aria-label="Add to Wishlist">♡</button>
+
+              <a href="{% url 'products:product_detail' slug=product.slug %}">
+                <img src="{% if product.primary_image %}{{ product.primary_image }}{% else %}https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=600&auto=format&fit=crop{% endif %}" alt="{{ product.name }}" class="card-img">
+              </a>
+
+              <div class="quickview-hover-bar">
+                <button type="button" class="quickview-trigger-btn" data-product-id="{{ product.id }}">QUICK VIEW</button>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <span class="card-category">{{ product.category.name }}</span>
+              <a href="{% url 'products:product_detail' slug=product.slug %}">
+                <h3 class="card-name">{{ product.name }}</h3>
+              </a>
+              
+              <div class="card-price-row">
+                <span class="card-price">₹{{ product.current_price }}</span>
+              </div>
+
+              <!-- SIZE BADGES -->
+              <div class="size-picker-row">
+                {% for ps in product.sizes.all %}
+                  <button type="button" class="size-badge {% if forloop.first %}active{% endif %}" data-size="{{ ps.size }}">
+                    {{ ps.size }}
+                  </button>
+                {% empty %}
+                  <button type="button" class="size-badge active" data-size="M">M</button>
+                  <button type="button" class="size-badge" data-size="L">L</button>
+                {% endfor %}
+              </div>
+
+              <form action="{% url 'cart:add' product.id %}" method="POST" class="ajax-add-cart-form">
+                {% csrf_token %}
+                <input type="hidden" name="size" value="M" class="card-selected-size-input">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="btn btn-primary card-add-btn">ADD TO CART</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-products-notice">
+            <p>NO NEW ARRIVALS AT THE MOMENT</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. BRAND STORY (EDITORIAL ABOUT SECTION) -->
+  <section class="brand-story-section">
+    <div class="container">
+      <div class="brand-story-grid">
+        <div class="story-image-col">
+          <img src="{% if story_banner %}{{ story_banner.image.url }}{% else %}https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop{% endif %}" alt="THE VALORY Brand Story" class="story-img">
+          <div class="story-img-badge">ESTABLISHED 2026 — TAMIL NADU</div>
+        </div>
+
+        <div class="story-content-col">
+          <span class="story-subtitle">CRAFTED FOR CONFIDENCE</span>
+          <h2 class="story-heading">MORE THAN WHAT YOU WEAR.</h2>
+          <p class="story-desc">
+            THE VALORY represents confidence, individuality, timeless design, and premium everyday wear. Built for Tamil Nadu, India, every piece undergoes hand-checked quality verification to ensure 240+ GSM heavyweight cotton comfort, structural drape, and enduring elegance.
+          </p>
+
+          <div class="story-stats-grid">
+            <div class="stat-item">
+              <span class="stat-num">240 GSM</span>
+              <span class="stat-label">Heavyweight Cotton</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">100% Verified</span>
+              <span class="stat-label">Tamil Nadu Dispatch</span>
+            </div>
+          </div>
+
+          <a href="{% url 'policies:general' %}" class="btn btn-outline btn-editorial">DISCOVER OUR STORY &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. SHIPPING & CUSTOMER TRUST STRIP -->
+  <section class="trust-banner-section">
+    <div class="container">
+      <div class="section-header-centered">
+        <span class="section-subtitle">THE VALORY GUARANTEE</span>
+        <h2 class="section-title">DESIGNED IN INDIA. DELIVERED ACROSS INDIA.</h2>
+      </div>
+
+      <div class="trust-grid">
+        <div class="trust-card">
+          <div class="trust-icon">💎</div>
+          <h3>PREMIUM QUALITY</h3>
+          <p>Carefully selected 240+ GSM heavyweight fabrics with precision embroidery.</p>
+        </div>
+
+        <div class="trust-card">
+          <div class="trust-icon">🔒</div>
+          <h3>SECURE PAYMENTS</h3>
+          <p>100% encrypted & cryptographically secure checkout experience.</p>
+        </div>
+
+        <div class="trust-card">
+          <div class="trust-icon">🚚</div>
+          <h3>FAST DELIVERY</h3>
+          <p>Reliable dispatch across Chennai, Coimbatore, Madurai, and all Tamil Nadu districts.</p>
+        </div>
+
+        <div class="trust-card">
+          <div class="trust-icon">🛡️</div>
+          <h3>CUSTOMER SUPPORT</h3>
+          <p>Dedicated assistance for sizing, delivery updates, and pre-dispatch orders.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. NEWSLETTER SUBSCRIBE SECTION -->
+  <section class="newsletter-section">
+    <div class="container">
+      <div class="newsletter-box">
+        <span class="newsletter-subtitle">EXCLUSIVES & DROPS</span>
+        <h2 class="newsletter-title">STAY IN THE VALORY</h2>
+        <p class="newsletter-desc">Be the first to discover new drops, exclusive releases, and brand updates.</p>
+
+        <form action="#" method="POST" class="newsletter-form" onsubmit="event.preventDefault(); alert('Thank you for subscribing to THE VALORY exclusive drops.');">
+          <input type="email" placeholder="ENTER YOUR EMAIL" required class="newsletter-input">
+          <button type="submit" class="btn btn-primary newsletter-btn">SUBSCRIBE</button>
+        </form>
+      </div>
+    </div>
+  </section>
+{% endblock %}

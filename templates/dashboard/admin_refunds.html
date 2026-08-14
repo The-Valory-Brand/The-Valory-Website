@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Damaged Refund Claims Review — THE VALORY Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+      <div>
+        <div class="subtitle">Main Admin Only</div>
+        <h2>Damaged Product Refund Claims</h2>
+      </div>
+      <a href="{% url 'reports:admin_dashboard' %}" class="btn btn-outline btn-sm">&larr; Executive Dashboard</a>
+    </div>
+
+    <!-- CLAIMS TABLE -->
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Claim ID</th>
+            <th>Order ID & Customer</th>
+            <th>Requested Date</th>
+            <th>Damage Description</th>
+            <th>Unboxing Evidence</th>
+            <th>Status</th>
+            <th>Process Claim</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for claim in claims %}
+            <tr>
+              <td style="font-weight: 700; color: var(--gold-primary);">
+                <a href="{% url 'refunds:claim_detail' claim_id=claim.claim_id %}">#{{ claim.claim_id }}</a>
+              </td>
+              <td>
+                <div style="font-weight: 600;">Order #{{ claim.order.order_id }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">{{ claim.customer.email }}</div>
+              </td>
+              <td style="font-size: 0.8rem;">{{ claim.requested_at|date:"M d, Y H:i" }}</td>
+              <td style="font-size: 0.85rem; max-width: 220px;">{{ claim.damage_description }}</td>
+              <td>
+                {% if claim.unboxing_video_url %}
+                  <a href="{{ claim.unboxing_video_url }}" target="_blank" style="color: var(--gold-primary); text-decoration: underline; font-weight: 600;">🎬 Watch Unboxing Video</a>
+                {% elif claim.unboxing_video_file %}
+                  <a href="{{ claim.unboxing_video_file.url }}" target="_blank" style="color: var(--gold-primary); text-decoration: underline; font-weight: 600;">🎬 Download Video File</a>
+                {% else %}
+                  <span style="color: var(--accent-red); font-size: 0.75rem;">No Video Attached</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="status-badge {% if claim.status == 'APPROVED' or claim.status == 'REFUND_PROCESSED' %}status-delivered{% elif claim.status == 'REJECTED' %}status-cancelled{% else %}status-dispatched{% endif %}">
+                  {{ claim.get_status_display }}
+                </span>
+              </td>
+              <td>
+                <form method="POST" action="{% url 'refunds:admin_process' claim_id=claim.claim_id %}" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                  {% csrf_token %}
+                  <select name="status" class="form-select" style="padding: 0.3rem 0.5rem; font-size: 0.8rem;">
+                    {% for st_val, st_name in status_choices %}
+                      <option value="{{ st_val }}" {% if claim.status == st_val %}selected{% endif %}>{{ st_name }}</option>
+                    {% endfor %}
+                  </select>
+                  <input type="text" name="admin_notes" value="{{ claim.admin_notes|default:'' }}" placeholder="Admin Verification Notes" class="form-input" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;">
+                  <button type="submit" class="btn btn-gold btn-sm" style="padding: 0.3rem 0.5rem; font-size: 0.75rem;">Update Claim</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                No damaged product refund claims submitted.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

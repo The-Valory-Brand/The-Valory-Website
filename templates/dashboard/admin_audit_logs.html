@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System & Security Audit Logs — THE VALORY Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <a href="{% url 'reports:admin_dashboard' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Executive Dashboard</a>
+        <h2 style="margin-top: 0.5rem;">📝 Security & Activity Audit Trail</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Exclusively accessible by Main Admin. All critical operations are immutably logged with timestamp, IP, and actor identity.</p>
+      </div>
+
+      <form method="GET" style="display: flex; gap: 0.5rem;">
+        <input type="text" name="q" value="{{ search_query }}" placeholder="Search action, actor, or details..." class="form-control" style="width: 250px;">
+        <button type="submit" class="btn btn-gold btn-sm">Filter Logs</button>
+      </form>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Actor / Identity</th>
+            <th>Action</th>
+            <th>Target Model</th>
+            <th>Target ID</th>
+            <th>Details & Metadata</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in page_obj %}
+            <tr>
+              <td style="font-size: 0.8rem; color: var(--gold-primary); white-space: nowrap;">
+                {{ log.timestamp|date:"Y-m-d H:i:s" }}
+              </td>
+              <td style="font-weight: 600; color: var(--text-main);">
+                {{ log.actor.email|default:"System / Anonymous" }}
+              </td>
+              <td>
+                <span class="status-badge" style="background: rgba(212, 175, 55, 0.15); color: var(--gold-primary); border: 1px solid var(--gold-primary);">
+                  {{ log.action }}
+                </span>
+              </td>
+              <td style="font-size: 0.85rem;">{{ log.target_model|default:"-" }}</td>
+              <td style="font-size: 0.85rem;">{{ log.target_id|default:"-" }}</td>
+              <td style="font-size: 0.85rem; color: var(--text-muted); max-width: 300px; word-break: break-word;">
+                {{ log.details|default:"N/A" }}
+              </td>
+              <td style="font-size: 0.8rem; color: var(--text-muted);">
+                {{ log.ip_address|default:"127.0.0.1" }}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                No audit log entries recorded matching your search.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    {% if page_obj.has_other_pages %}
+      <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-outline btn-sm">&larr; Previous</a>
+        {% endif %}
+
+        <span style="align-self: center; font-size: 0.85rem; color: var(--text-muted);">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-outline btn-sm">Next &rarr;</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

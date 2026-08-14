@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #0A0A0A; color: #F9F8F6; margin: 0; padding: 0; }
+    .container { max-width: 550px; margin: 30px auto; background-color: #141414; border: 1px solid #D4AF37; padding: 40px; text-align: center; }
+    .logo { font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #F9F8F6; margin-bottom: 5px; }
+    .tagline { font-size: 10px; letter-spacing: 3px; color: #D4AF37; text-transform: uppercase; margin-bottom: 30px; }
+    .otp-box { font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #D4AF37; background-color: #0A0A0A; border: 1px dashed #D4AF37; padding: 20px; margin: 25px 0; display: inline-block; width: 80%; }
+    .desc { font-size: 14px; color: #A3A3A3; line-height: 1.6; }
+    .footer { font-size: 11px; color: #666; margin-top: 30px; border-top: 1px solid #262626; padding-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">THE VALORY</div>
+    <div class="tagline">Timeless Elegance</div>
+
+    <h2 style="color: #F9F8F6; font-size: 18px; margin-bottom: 10px;">{{ purpose }}</h2>
+    <p class="desc">Please use the verification code below to complete your authentication with THE VALORY.</p>
+
+    <div class="otp-box">{{ otp_code }}</div>
+
+    <p class="desc">This OTP code is valid for <strong>{{ expiry_minutes }} minutes</strong>. Do not share this code with anyone.</p>
+
+    <div class="footer">
+      &copy; 2026 THE VALORY • Shipping across all over Tamil Nadu, India.
+    </div>
+  </div>
+</body>
+</html>

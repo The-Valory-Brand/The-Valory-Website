@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Security — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container" style="max-width: 600px;">
+    
+    <div style="margin-bottom: 2rem;">
+      <a href="{% url 'accounts:profile' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Profile</a>
+      <h2 style="margin-top: 0.5rem;">🔐 Account Security</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">Manage your password, login credentials, and active sessions.</p>
+    </div>
+
+    <div class="card" style="padding: 2rem;">
+      <h3 style="font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 1.5rem;">Change Password</h3>
+
+      <form method="POST">
+        {% csrf_token %}
+        <div style="display: grid; gap: 1rem;">
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Current Password *</label>
+            <input type="password" name="current_password" required class="form-control">
+          </div>
+
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted);">New Password *</label>
+            <input type="password" name="new_password" required class="form-control" placeholder="At least 8 characters">
+          </div>
+
+          <div>
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Confirm New Password *</label>
+            <input type="password" name="confirm_password" required class="form-control">
+          </div>
+
+          <button type="submit" class="btn btn-gold btn-block" style="margin-top: 0.5rem;">Update Password</button>
+        </div>
+      </form>
+
+      <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+        <h4 style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.5rem;">Email Verification Status</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Email: <strong>{{ user.email }}</strong><br>
+          Status: {% if user.is_email_verified %}<span style="color: #4cd964;">Verified ✓</span>{% else %}<span style="color: #ff3b30;">Unverified</span>{% endif %}
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

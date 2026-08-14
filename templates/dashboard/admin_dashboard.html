@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Main Admin Financial & Executive Dashboard — THE VALORY{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container">
+    
+    <!-- DASHBOARD HEADER & CSV EXPORTERS -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <div class="subtitle">Main Admin Only • Executive Portal</div>
+        <h2>Business Analytics & Financial Control</h2>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{% url 'products:manager_banners' %}" class="btn btn-gold btn-sm">🖼️ Edit Hero & Banners</a>
+        <a href="{% url 'products:manager_products' %}" class="btn btn-gold btn-sm">🛍️ Edit Products & Stock</a>
+        <a href="{% url 'products:manager_categories' %}" class="btn btn-gold btn-sm">🏷️ Edit Categories</a>
+        <a href="{% url 'accounts:list_managers' %}" class="btn btn-primary btn-sm">👥 Manage Managers</a>
+        <a href="{% url 'reports:export_sales_csv' %}" class="btn btn-outline btn-sm">📥 Sales CSV</a>
+        <a href="{% url 'reports:export_returns_csv' %}" class="btn btn-outline btn-sm">📥 Refund CSV</a>
+        <a href="{% url 'reports:export_inventory_csv' %}" class="btn btn-outline btn-sm">📥 Inventory CSV</a>
+      </div>
+    </div>
+
+    <!-- DATE PERIOD FILTER -->
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1rem; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+      <span style="font-size: 0.85rem; color: var(--gold-primary); font-weight: 600;">Time Period:</span>
+      <a href="?period=today" class="btn btn-outline btn-sm {% if current_period == 'today' %}btn-gold{% endif %}">Today</a>
+      <a href="?period=7days" class="btn btn-outline btn-sm {% if current_period == '7days' %}btn-gold{% endif %}">Last 7 Days</a>
+      <a href="?period=this_month" class="btn btn-outline btn-sm {% if current_period == 'this_month' %}btn-gold{% endif %}">This Month</a>
+      <a href="?period=30days" class="btn btn-outline btn-sm {% if current_period == '30days' %}btn-gold{% endif %}">Last 30 Days</a>
+      <a href="?period=all" class="btn btn-outline btn-sm {% if current_period == 'all' %}btn-gold{% endif %}">All Time</a>
+    </div>
+
+    <!-- REVENUE & FINANCIAL CARDS (CONFIDENTIAL — MAIN ADMIN ONLY) -->
+    <div class="stats-grid">
+      <div class="stat-card" style="border-color: var(--gold-primary);">
+        <div class="stat-label">Total Selected Revenue</div>
+        <div class="stat-value">₹{{ total_revenue }}</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Excludes cancelled orders</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Today's Revenue</div>
+        <div class="stat-value">₹{{ today_revenue }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">This Month's Revenue</div>
+        <div class="stat-value">₹{{ monthly_revenue }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Total Verified Orders</div>
+        <div class="stat-value" style="color: #60A5FA;">{{ total_orders_count }}</div>
+      </div>
+    </div>
+
+    <!-- SECOND ROW: REFUND CLAIMS & CUSTOMER METRICS -->
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 2.5rem;">
+      <div class="stat-card">
+        <div class="stat-label">Damaged Refund Claims</div>
+        <div class="stat-value" style="color: #F87171;">{{ total_refund_claims }}</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Approved: {{ approved_refund_claims }} | Rejected: {{ rejected_refund_claims }}
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Approved Refund Amount</div>
+        <div class="stat-value" style="color: #F87171;">₹{{ approved_refund_amount }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Total Registered Customers</div>
+        <div class="stat-value">{{ total_customers_count }}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">New Customers (Period)</div>
+        <div class="stat-value" style="color: #34D399;">+{{ new_customers_count }}</div>
+      </div>
+    </div>
+
+    <!-- MAIN ADMIN PANELS GRID -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 3rem;">
+      
+      <!-- TOP SELLING PRODUCTS -->
+      <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1.5rem;">
+        <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 0.75rem;">Top Performing Products</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Product Name</th>
+                <th>Units Sold</th>
+                <th>Total Sales</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tp in top_products %}
+                <tr>
+                  <td style="font-size: 0.8rem; color: var(--text-muted);">{{ tp.sku }}</td>
+                  <td style="font-weight: 600;">{{ tp.product__name }}</td>
+                  <td>{{ tp.total_units }}</td>
+                  <td style="font-weight: 700; color: var(--gold-primary);">₹{{ tp.total_sales }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4" style="color: var(--text-muted); text-align: center;">No product sales recorded for this period.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LOW STOCK ALERTS -->
+      <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1.5rem;">
+        <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 0.75rem; color: #F87171;">⚠️ Low Stock Inventory Alerts</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Size</th>
+                <th>Remaining Stock</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ls in low_stock_items %}
+                <tr>
+                  <td style="font-weight: 600;">{{ ls.product.name }}</td>
+                  <td><span class="status-badge" style="background-color: rgba(239,68,68,0.2); color: #F87171;">{{ ls.size }}</span></td>
+                  <td style="font-weight: 700; color: #F87171;">{{ ls.stock_quantity }} left</td>
+                  <td>
+                    <a href="{% url 'products:manager_product_edit' product_id=ls.product.id %}" class="btn btn-outline btn-sm">Restock</a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4" style="color: var(--text-muted); text-align: center;">All garment size stocks are at healthy levels.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AUDIT LOG TRAIL -->
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1.5rem;">
+      <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 0.75rem;">System & Manager Audit Log</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Actor</th>
+              <th>Action</th>
+              <th>Target</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in recent_audit_logs %}
+              <tr>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                <td style="font-weight: 600;">{{ log.actor.email|default:"System" }}</td>
+                <td><span class="status-badge status-placed">{{ log.action }}</span></td>
+                <td style="font-size: 0.8rem;">{{ log.target_model }} #{{ log.target_id }}</td>
+                <td style="font-size: 0.85rem; color: var(--text-muted);">{{ log.details }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" style="color: var(--text-muted); text-align: center;">No audit logs recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

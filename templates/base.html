@@ -1,0 +1,285 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}THE VALORY — Timeless Elegance{% endblock %}</title>
+  <meta name="description" content="THE VALORY — Luxury fashion, heavyweight streetwear, and athletic wear. Shipping across Tamil Nadu, India. Timeless Elegance.">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- DESKTOP & MOBILE NAVIGATION HEADER -->
+  <header class="navbar" id="mainHeaderNavbar">
+    <div class="container nav-container">
+      <!-- BRAND LOGO -->
+      <a href="{% url 'products:home' %}" class="nav-brand" aria-label="THE VALORY Home">
+        <span class="brand-logo">THE VALORY</span>
+        <span class="brand-tagline">TIMELESS ELEGANCE</span>
+      </a>
+
+      <!-- CENTERED HORIZONTAL NAVIGATION LINKS -->
+      <nav class="desktop-nav-wrapper" aria-label="Main navigation">
+        <ul class="nav-links">
+          <li><a href="{% url 'products:home' %}" class="nav-link" data-nav-item="home">HOME</a></li>
+          <li><a href="{% url 'products:shop' %}" class="nav-link" data-nav-item="shop">SHOP</a></li>
+          <li><a href="{% url 'products:home' %}#categories" class="nav-link" data-nav-item="category">CATEGORY</a></li>
+        </ul>
+      </nav>
+
+      <!-- NAV ACTIONS (RIGHT) -->
+      <div class="nav-actions">
+        <!-- SEARCH TRIGGER -->
+        <button type="button" id="openSearchModalBtn" class="icon-btn" title="Search Catalog" aria-label="Search Catalog">🔍</button>
+
+        <!-- WISHLIST ICON -->
+        <a href="{% url 'products:shop' %}" class="icon-btn" title="Wishlist" aria-label="Wishlist">♡</a>
+
+        <!-- CART DRAWER TRIGGER ICON -->
+        <button type="button" id="openCartDrawerBtn" class="icon-btn" title="Shopping Cart" aria-label="Shopping Cart">
+          🛒
+          <span class="badge" id="navCartBadge" style="{% if cart_item_count == 0 %}display:none;{% endif %}">{{ cart_item_count }}</span>
+        </button>
+
+        <!-- MANAGER PANEL BUTTON (ONLY WHEN AUTHORIZED MANAGER/ADMIN) -->
+        {% if user.is_authenticated and user.is_manager or user.is_main_admin %}
+          <a href="{% if user.is_main_admin %}{% url 'reports:admin_dashboard' %}{% else %}{% url 'orders:manager_dashboard' %}{% endif %}" class="btn btn-gold btn-sm nav-manager-badge">
+            {% if user.is_main_admin %}Admin Panel{% else %}Manager Panel{% endif %}
+          </a>
+        {% endif %}
+
+        <!-- ROLE-AWARE PROFILE DROPDOWN MENU -->
+        {% if user.is_authenticated %}
+          <div class="options-dropdown-container">
+            <button type="button" id="optionsMenuToggle" class="circular-3dot-btn" title="Account Options" aria-label="Account Menu">
+              👤
+            </button>
+            
+            <div id="optionsMenuDropdown" class="chrome-style-menu">
+              <!-- USER BANNER SECTION -->
+              <div class="menu-user-banner">
+                <div class="user-avatar-circle">
+                  {% if user.is_main_admin %}👑{% elif user.is_manager %}💼{% else %}{{ user.first_name|default:user.email|slice:":1"|upper }}{% endif %}
+                </div>
+                <div class="user-banner-info">
+                  <div class="user-banner-name">{{ user.first_name|default:user.email }}</div>
+                  <div class="user-banner-status">
+                    <span class="status-dot"></span>
+                    {% if user.is_main_admin %}👑 Main Admin{% elif user.is_manager %}💼 Operational Manager{% else %}🛍️ Verified Customer{% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="menu-divider"></div>
+
+              <!-- MAIN ADMIN ROLE LINKS -->
+              {% if user.is_main_admin %}
+                <a href="{% url 'reports:admin_dashboard' %}" class="chrome-menu-item"><span class="menu-icon">📊</span><span class="menu-label">Executive Dashboard</span></a>
+                <a href="{% url 'products:manager_banners' %}" class="chrome-menu-item"><span class="menu-icon">🖼️</span><span class="menu-label">Site & Hero Banners</span></a>
+                <a href="{% url 'products:manager_products' %}" class="chrome-menu-item"><span class="menu-icon">📦</span><span class="menu-label">Products Management</span></a>
+                <a href="{% url 'orders:manager_dashboard' %}" class="chrome-menu-item"><span class="menu-icon">📋</span><span class="menu-label">Orders Management</span></a>
+                <a href="{% url 'accounts:list_managers' %}" class="chrome-menu-item"><span class="menu-icon">👥</span><span class="menu-label">Manager Accounts</span></a>
+                <a href="{% url 'audit:audit_logs' %}" class="chrome-menu-item"><span class="menu-icon">📝</span><span class="menu-label">Audit Logs</span></a>
+                <a href="{% url 'accounts:settings' %}" class="chrome-menu-item"><span class="menu-icon">⚙️</span><span class="menu-label">Settings</span></a>
+
+              <!-- MANAGER ROLE LINKS -->
+              {% elif user.is_manager %}
+                <a href="{% url 'orders:manager_dashboard' %}" class="chrome-menu-item"><span class="menu-icon">📊</span><span class="menu-label">Manager Dashboard</span></a>
+                <a href="{% url 'products:manager_banners' %}" class="chrome-menu-item"><span class="menu-icon">🖼️</span><span class="menu-label">Site & Hero Banners</span></a>
+                <a href="{% url 'orders:manager_dashboard' %}" class="chrome-menu-item"><span class="menu-icon">📋</span><span class="menu-label">Orders Fulfillment</span></a>
+                <a href="{% url 'products:manager_products' %}" class="chrome-menu-item"><span class="menu-icon">📦</span><span class="menu-label">Products & Stock</span></a>
+                <a href="{% url 'products:manager_categories' %}" class="chrome-menu-item"><span class="menu-icon">🗂️</span><span class="menu-label">Categories</span></a>
+                <a href="{% url 'accounts:profile' %}" class="chrome-menu-item"><span class="menu-icon">👤</span><span class="menu-label">Manager Profile</span></a>
+
+              <!-- CUSTOMER ROLE LINKS -->
+              {% else %}
+                <a href="{% url 'accounts:profile' %}" class="chrome-menu-item"><span class="menu-icon">👤</span><span class="menu-label">My Profile</span></a>
+                <a href="{% url 'orders:customer_dashboard' %}" class="chrome-menu-item"><span class="menu-icon">🛍️</span><span class="menu-label">My Orders</span></a>
+                <a href="{% url 'products:recently_viewed' %}" class="chrome-menu-item"><span class="menu-icon">👁️</span><span class="menu-label">Recently Viewed</span></a>
+                <a href="{% url 'accounts:list_addresses' %}" class="chrome-menu-item"><span class="menu-icon">📍</span><span class="menu-label">Saved Addresses</span></a>
+                <a href="{% url 'accounts:settings' %}" class="chrome-menu-item"><span class="menu-icon">⚙️</span><span class="menu-label">Account Settings</span></a>
+              {% endif %}
+
+              <div class="menu-divider"></div>
+
+              <!-- LOGOUT -->
+              <a href="{% url 'accounts:logout' %}" class="chrome-menu-item chrome-menu-item-exit">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-label">Logout</span>
+              </a>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-sm">Sign In</a>
+        {% endif %}
+
+        <!-- MOBILE HAMBURGER TOGGLE -->
+        <button id="mobileNavToggle" class="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">☰</button>
+      </div>
+    </div>
+
+    <!-- RESPONSIVE MOBILE NAVIGATION DRAWER -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer" aria-hidden="true">
+      <div class="mobile-nav-content">
+        <ul class="mobile-nav-links">
+          <li><a href="{% url 'products:home' %}" class="mobile-nav-link" data-nav-item="home">HOME</a></li>
+          <li><a href="{% url 'products:shop' %}" class="mobile-nav-link" data-nav-item="shop">SHOP</a></li>
+          <li><a href="{% url 'products:home' %}#categories" class="mobile-nav-link" data-nav-item="category">CATEGORY</a></li>
+          <li><a href="{% url 'policies:shipping' %}" class="mobile-nav-link" data-nav-item="shipping">SHIPPING (TAMIL NADU)</a></li>
+          <li><a href="{% url 'policies:general' %}" class="mobile-nav-link">ABOUT & POLICIES</a></li>
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'accounts:profile' %}" class="mobile-nav-link" style="color:var(--gold-primary);">MY ACCOUNT</a></li>
+            {% if user.is_manager or user.is_main_admin %}
+              <li><a href="{% if user.is_main_admin %}{% url 'reports:admin_dashboard' %}{% else %}{% url 'orders:manager_dashboard' %}{% endif %}" class="mobile-nav-link" style="color:var(--gold-primary);">MANAGER PANEL</a></li>
+            {% endif %}
+          {% else %}
+            <li><a href="{% url 'accounts:login' %}" class="mobile-nav-link" style="color:var(--gold-primary);">SIGN IN</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- SLIDE-OVER CART DRAWER -->
+  <div id="cartDrawerOverlay" class="cart-drawer-overlay">
+    <div id="cartDrawerPanel" class="cart-drawer-panel">
+      <div class="cart-drawer-header">
+        <h3>YOUR CART <span id="cartDrawerCount">(0)</span></h3>
+        <button type="button" id="closeCartDrawerBtn" class="close-drawer-btn">×</button>
+      </div>
+
+      <div id="cartDrawerContent" class="cart-drawer-body">
+        <!-- Dynamically loaded via JS -->
+      </div>
+
+      <div class="cart-drawer-footer">
+        <div class="cart-subtotal-row">
+          <span>SUBTOTAL:</span>
+          <span id="cartDrawerSubtotal" class="subtotal-amount">₹0.00</span>
+        </div>
+        <div class="cart-drawer-actions">
+          <a href="{% url 'cart:detail' %}" class="btn btn-outline btn-full">VIEW CART</a>
+          <a href="{% url 'cart:detail' %}" class="btn btn-primary btn-full">PROCEED TO CHECKOUT</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH OVERLAY MODAL -->
+  <div id="searchModalOverlay" class="search-modal-overlay">
+    <div class="search-modal-container">
+      <div class="search-modal-header">
+        <span class="search-title">CATALOG SEARCH</span>
+        <button type="button" id="closeSearchModalBtn" class="close-search-btn">×</button>
+      </div>
+      <div class="search-input-wrapper">
+        <input type="text" id="liveSearchInput" placeholder="Search tees, hoodies, jerseys..." autocomplete="off">
+        <span class="search-icon-inside">🔍</span>
+      </div>
+      <div id="searchModalResults" class="search-results-area">
+        <!-- Live search results appended dynamically -->
+        <div class="search-popular-categories">
+          <span class="search-section-label">POPULAR CATEGORIES</span>
+          <div class="category-pills">
+            {% for cat in categories %}
+              <a href="{% url 'products:shop' %}?category={{ cat.slug }}" class="pill-btn">{{ cat.name|upper }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK VIEW POPUP MODAL -->
+  <div id="quickViewModalOverlay" class="quickview-overlay">
+    <div class="quickview-container">
+      <button type="button" id="closeQuickViewBtn" class="close-quickview-btn">×</button>
+      <div id="quickViewContent" class="quickview-content">
+        <!-- Populated via AJAX -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST MESSAGES CONTAINER -->
+  {% if messages %}
+    <div class="toast-container">
+      {% for message in messages %}
+        <div class="toast {{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- MAIN CONTENT BLOCK -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- LUXURY FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <!-- BRAND -->
+        <div class="footer-brand-col">
+          <a href="{% url 'products:home' %}" class="nav-brand" style="margin-bottom: 1rem;">
+            <span class="brand-logo" style="font-size: 1.5rem;">THE VALORY</span>
+            <span class="brand-tagline">TIMELESS ELEGANCE</span>
+          </a>
+          <p class="footer-desc">
+            "Premium clothing designed for modern confidence. Heavyweight cotton tees, luxury fleece hoodies, and tailored athletic wear delivered across all over Tamil Nadu & India."
+          </p>
+          <div class="social-links flex gap-4 mt-4">
+            <a href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+            <a href="https://facebook.com" target="_blank" rel="noreferrer">Facebook</a>
+            <a href="https://youtube.com" target="_blank" rel="noreferrer">YouTube</a>
+          </div>
+        </div>
+
+        <!-- SHOP -->
+        <div>
+          <h4 class="footer-title">SHOP</h4>
+          <ul class="footer-links">
+            {% for cat in categories %}
+              <li><a href="{% url 'products:shop' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- HELP -->
+        <div>
+          <h4 class="footer-title">HELP</h4>
+          <ul class="footer-links">
+            <li><a href="{% url 'policies:shipping' %}">Tamil Nadu Shipping</a></li>
+            <li><a href="{% url 'policies:refund' %}">Refund Policy</a></li>
+            <li><a href="{% url 'policies:return_exchange' %}">No Return & Exchange</a></li>
+            <li><a href="{% url 'policies:order' %}">Order Cancellation</a></li>
+            <li><a href="{% url 'policies:general' %}">General Support</a></li>
+          </ul>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div>
+          <h4 class="footer-title">ACCOUNT</h4>
+          <ul class="footer-links">
+            <li><a href="{% url 'accounts:profile' %}">My Profile</a></li>
+            <li><a href="{% url 'orders:customer_dashboard' %}">My Orders</a></li>
+            <li><a href="{% url 'products:recently_viewed' %}">Recently Viewed</a></li>
+            <li><a href="{% url 'cart:detail' %}">Shopping Cart</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; 2026 THE VALORY. All Rights Reserved.</span>
+        <span>Designed for Timeless Elegance.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

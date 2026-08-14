@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section style="padding: 4rem 0;">
+  <div class="container" style="max-width: 800px;">
+    
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <div class="subtitle">THE VALORY Official Policy</div>
+      <h2>{{ policy_name }}</h2>
+      <div style="font-size: 0.8rem; color: var(--gold-primary); margin-top: 0.5rem;">Version {{ policy.version|default:"1.0" }} • Updated {{ policy.updated_at|date:"M Y"|default:"2026" }}</div>
+    </div>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 3rem; line-height: 1.8; color: var(--text-main);">
+      {% if policy %}
+        {{ policy.content|safe }}
+      {% else %}
+        <p style="color: var(--text-muted);">Policy details are currently being updated by THE VALORY management.</p>
+      {% endif %}
+
+      <div style="border-top: 1px solid var(--border-dark); padding-top: 2rem; margin-top: 3rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+        Questions regarding our policies? Contact our Tamil Nadu support team at <a href="mailto:support@thevalory.com" style="color: var(--gold-primary); text-decoration: underline;">support@thevalory.com</a>.
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Moderation — THE VALORY Admin{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+      <div>
+        <div class="subtitle">Main Admin Moderation</div>
+        <h2>Customer Reviews Moderation</h2>
+      </div>
+      <a href="{% url 'reports:admin_dashboard' %}" class="btn btn-outline btn-sm">&larr; Executive Dashboard</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Customer</th>
+            <th>Rating</th>
+            <th>Title & Comment</th>
+            <th>Verified Buyer</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rev in reviews %}
+            <tr>
+              <td style="font-weight: 600;">{{ rev.product.name }}</td>
+              <td style="font-size: 0.85rem;">{{ rev.customer.email }}</td>
+              <td style="color: var(--gold-primary); font-weight: 700;">{{ rev.rating }}★</td>
+              <td>
+                <div style="font-weight: 600; font-size: 0.9rem;">{{ rev.title }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ rev.comment }}</div>
+              </td>
+              <td>
+                {% if rev.is_verified_purchaser %}
+                  <span class="status-badge status-delivered">Verified</span>
+                {% else %}
+                  <span class="status-badge status-cancelled">Unverified</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if rev.is_approved %}
+                  <span class="status-badge status-delivered">Approved</span>
+                {% else %}
+                  <span class="status-badge status-cancelled">Hidden</span>
+                {% endif %}
+              </td>
+              <td>
+                <form method="POST" action="{% url 'reviews:admin_toggle' review_id=rev.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline btn-sm">
+                    {% if rev.is_approved %}Hide Review{% else %}Approve Review{% endif %}
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                No customer reviews submitted.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

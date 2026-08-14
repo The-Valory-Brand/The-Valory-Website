@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container">
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; margin-bottom: 4rem;">
+      
+      <!-- IMAGE GALLERY -->
+      <div>
+        <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); aspect-ratio: 3/4; overflow: hidden; margin-bottom: 1rem;">
+          <img id="mainProductImage" src="{% if product.primary_image %}{{ product.primary_image }}{% else %}https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80{% endif %}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+
+        {% if product.images.all.count > 1 %}
+          <div style="display: flex; gap: 0.75rem; overflow-x: auto;">
+            {% for img in product.images.all %}
+              <div class="thumb-img {% if forloop.first %}active{% endif %}" data-full="{{ img.image.url }}" style="width: 70px; height: 90px; border: 1px solid var(--border-dark); cursor: pointer; flex-shrink: 0; background-color: #1a1a1a;">
+                <img src="{{ img.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- PRODUCT PURCHASE OPTIONS -->
+      <div>
+        <div class="subtitle">{{ product.category.name }} • SKU: {{ product.sku }}</div>
+        <h1 style="font-size: 2rem; margin-bottom: 1rem;">{{ product.name }}</h1>
+
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+          <span style="font-size: 1.8rem; font-weight: 700; color: var(--gold-primary);">₹{{ product.current_price }}</span>
+          {% if product.discount_price and product.discount_price < product.price %}
+            <span style="font-size: 1.2rem; color: var(--text-muted); text-decoration: line-through;">₹{{ product.price }}</span>
+          {% endif %}
+        </div>
+
+        <p style="color: var(--text-muted); line-height: 1.7; margin-bottom: 2rem;">
+          {{ product.description }}
+        </p>
+
+        <!-- ADD TO CART FORM -->
+        <form method="POST" action="{% url 'cart:add' product_id=product.id %}">
+          {% csrf_token %}
+
+          <!-- SIZE SELECTION -->
+          <div style="margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label class="form-label" style="margin: 0;">Select Garment Size</label>
+              <a href="{% url 'policies:return_exchange' %}" style="font-size: 0.75rem; color: var(--gold-primary); text-decoration: underline;">Size Guide & No-Return Policy</a>
+            </div>
+
+            <input type="hidden" name="size" id="selectedSizeInput" value="" required>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              {% for ps in sizes %}
+                <button type="button" class="btn btn-outline size-select-btn {% if ps.stock_quantity == 0 %}out-of-stock{% endif %}" data-size="{{ ps.size }}" data-stock="{{ ps.stock_quantity }}" style="min-width: 50px; padding: 0.6rem 1rem; {% if ps.stock_quantity == 0 %}opacity: 0.3; cursor: not-allowed; text-decoration: line-through;{% endif %}">
+                  {{ ps.size }}
+                </button>
+              {% empty %}
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Standard sizes currently updating.</p>
+              {% endfor %}
+            </div>
+
+            <div id="stockDisplayNotice" style="font-size: 0.8rem; margin-top: 0.5rem; height: 20px;"></div>
+          </div>
+
+          <!-- QUANTITY SELECTOR -->
+          <div style="margin-bottom: 2rem;">
+            <label class="form-label">Quantity</label>
+            <input type="number" name="quantity" value="1" min="1" max="10" class="form-input" style="width: 100px;">
+          </div>
+
+          <!-- BUY / ADD TO CART -->
+          <button type="submit" class="btn btn-gold" style="width: 100%; padding: 1.1rem; font-size: 0.95rem;">
+            Add to Shopping Cart
+          </button>
+        </form>
+
+        <!-- BRAND PROMISE NOTICE -->
+        <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--bg-card); border: 1px solid var(--border-dark); font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+          <p style="margin-bottom: 0.5rem; color: var(--text-main); font-weight: 600;">📦 Delivery & Policies Notice:</p>
+          <ul style="padding-left: 1.25rem;">
+            <li>Ships across <strong>all over Tamil Nadu, India</strong>.</li>
+            <li><strong>NO RETURNS & NO EXCHANGES.</strong> Please verify your size before ordering.</li>
+            <li>Refunds issued <strong>ONLY for damaged items</strong> backed by an unboxing video submitted within 24 hours of delivery.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CUSTOMER REVIEWS SECTION -->
+    <div style="border-top: 1px solid var(--border-dark); padding-top: 3rem; margin-top: 3rem;">
+      <h2>Customer Reviews & Ratings</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 2rem;">
+        
+        <!-- SUBMIT REVIEW FORM -->
+        <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1.5rem;">
+          <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Write a Review</h3>
+          {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'reviews:add' product_id=product.id %}">
+              {% csrf_token %}
+              <div class="form-group">
+                <label class="form-label">Rating (1 to 5 Stars)</label>
+                <select name="rating" class="form-select">
+                  <option value="5">5 Stars — Excellent</option>
+                  <option value="4">4 Stars — Great Quality</option>
+                  <option value="3">3 Stars — Average</option>
+                  <option value="2">2 Stars — Below Expectations</option>
+                  <option value="1">1 Star — Poor</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Review Headline</label>
+                <input type="text" name="title" placeholder="e.g. Premium Heavyweight Quality!" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Detailed Comments</label>
+                <textarea name="comment" rows="3" placeholder="Share your experience with fit, fabric GSM, and delivery..." class="form-textarea" required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">Submit Verified Review</button>
+            </form>
+          {% else %}
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Please <a href="{% url 'accounts:login' %}" style="color: var(--gold-primary); text-decoration: underline;">log in</a> to post a product review.</p>
+          {% endif %}
+        </div>
+
+        <!-- REVIEWS LIST -->
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {% for rev in approved_reviews %}
+            <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span style="color: var(--gold-primary); font-size: 1.1rem;">
+                  {% for i in "12345" %}{% if forloop.counter <= rev.rating %}★{% else %}☆{% endif %}{% endfor %}
+                </span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">{{ rev.created_at|date:"M d, Y" }}</span>
+              </div>
+              <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">{{ rev.title }}</h4>
+              <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">{{ rev.comment }}</p>
+              <div style="font-size: 0.75rem; color: var(--gold-primary);">
+                By {{ rev.customer.first_name|default:rev.customer.email }} {% if rev.is_verified_purchaser %}✓ Verified Buyer{% endif %}
+              </div>
+            </div>
+          {% empty %}
+            <p style="color: var(--text-muted); padding: 2rem; background-color: var(--bg-card); border: 1px solid var(--border-dark); text-align: center;">
+              No reviews written yet for this product. Be the first to leave a review!
+            </p>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

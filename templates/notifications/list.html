@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container" style="max-width: 800px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <a href="{% url 'accounts:dashboard' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Dashboard</a>
+        <h2 style="margin-top: 0.5rem;">🔔 Notifications</h2>
+      </div>
+
+      <a href="{% url 'notifications:mark_all_read' %}" class="btn btn-outline btn-sm">Mark All as Read</a>
+    </div>
+
+    <div style="display: grid; gap: 1rem;">
+      {% for notif in notifications %}
+        <div class="card" style="padding: 1.25rem; border-left: 4px solid {% if notif.is_read %}rgba(255,255,255,0.2){% else %}var(--gold-primary){% endif %}; background: {% if notif.is_read %}transparent{% else %}rgba(212, 175, 55, 0.04){% endif %};">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <h3 style="font-size: 1rem; color: var(--text-main); margin-bottom: 0.25rem;">{{ notif.title }}</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">{{ notif.created_at|date:"M d, H:i" }}</span>
+          </div>
+
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.5rem;">
+            {{ notif.message }}
+          </p>
+
+          {% if notif.link %}
+            <div style="margin-top: 0.75rem;">
+              <a href="{% url 'notifications:mark_read' notification_id=notif.id %}" style="font-size: 0.8rem; color: var(--gold-primary); font-weight: 600;">View Details &rarr;</a>
+            </div>
+          {% endif %}
+        </div>
+      {% empty %}
+        <div class="card" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+          No notifications at this time.
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

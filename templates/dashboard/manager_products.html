@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Product Catalog Management — THE VALORY Manager{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container">
+    
+    <div class="dashboard-header-row">
+      <div>
+        <span class="dashboard-subtitle">CATALOG CONTROL</span>
+        <h2 class="dashboard-title">Product & Stock Management</h2>
+      </div>
+
+      <div class="dashboard-actions-group">
+        <a href="{% url 'products:manager_product_create' %}" class="btn btn-gold btn-sm">+ CREATE NEW PRODUCT</a>
+        <a href="{% url 'products:manager_banners' %}" class="btn btn-outline btn-sm">🖼️ EDIT HERO & BANNERS</a>
+        <a href="{% url 'products:manager_categories' %}" class="btn btn-outline btn-sm">🏷️ MANAGE CATEGORIES</a>
+        {% if user.is_main_admin %}
+          <a href="{% url 'reports:admin_dashboard' %}" class="btn btn-outline btn-sm">EXECUTIVE DASHBOARD &rarr;</a>
+        {% else %}
+          <a href="{% url 'orders:manager_dashboard' %}" class="btn btn-outline btn-sm">ORDER FULFILLMENT</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <form method="GET" action="{% url 'products:manager_products' %}" class="dashboard-search-form">
+      <input type="text" name="q" value="{{ search_query }}" placeholder="Search by Product Name, SKU, Product ID..." class="form-input">
+      <button type="submit" class="btn btn-gold btn-sm">SEARCH</button>
+    </form>
+
+    <!-- PRODUCTS TABLE -->
+    <div class="data-table-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IMAGE</th>
+              <th>PRODUCT NAME & SKU</th>
+              <th>CATEGORY</th>
+              <th>PRICE</th>
+              <th>STOCK BY SIZE</th>
+              <th>STATUS</th>
+              <th>ACTIONS & PHOTOS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+              <tr>
+                <td>
+                  <img src="{% if product.primary_image %}{{ product.primary_image }}{% else %}https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=100&q=80{% endif %}" alt="{{ product.name }}" class="table-thumb-img">
+                </td>
+                <td class="table-name-cell">
+                  <div class="font-bold text-white">{{ product.name }}</div>
+                  <div class="text-xs text-muted">SKU: {{ product.sku }} | ID: {{ product.product_id }}</div>
+                </td>
+                <td><span class="category-badge">{{ product.category.name }}</span></td>
+                <td class="table-price-cell">₹{{ product.current_price }}</td>
+                <td>
+                  <div class="stock-badges-grid">
+                    {% for ps in product.sizes.all %}
+                      <span class="stock-chip {% if ps.stock_quantity <= 5 %}stock-low{% else %}stock-ok{% endif %}">
+                        {{ ps.size }}: {{ ps.stock_quantity }}
+                      </span>
+                    {% endfor %}
+                  </div>
+                </td>
+                <td>
+                  {% if product.is_active %}
+                    <span class="status-badge status-active">Active</span>
+                  {% else %}
+                    <span class="status-badge status-inactive">Inactive</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="table-action-buttons">
+                    <a href="{% url 'products:manager_product_edit' product_id=product.id %}" class="btn btn-outline btn-sm">EDIT & PHOTOS</a>
+                    <form method="POST" action="{% url 'products:manager_product_toggle' product_id=product.id %}" class="inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline btn-sm">{% if product.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+                    </form>
+                    <form method="POST" action="{% url 'products:manager_product_delete' product_id=product.id %}" class="inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to permanently delete product \'{{ product.name|escapejs }}\'?');">🗑️ DELETE</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="table-empty-cell">
+                  No products found in catalog.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

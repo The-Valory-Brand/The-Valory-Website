@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit Category{% else %}Create Category{% endif %} — THE VALORY{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container" style="max-width: 650px;">
+    
+    <a href="{% url 'products:manager_categories' %}" class="back-link">&larr; Back to Categories</a>
+    <h2 class="dashboard-heading">{% if is_edit %}Edit Category: {{ category.name }}{% else %}Create New Category{% endif %}</h2>
+
+    <div class="dashboard-card">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">Category Name *</label>
+          {{ form.name }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          {{ form.description }}
+        </div>
+
+        <!-- EXISTING CATEGORY IMAGE WITH DELETE CONTROL -->
+        {% if is_edit and category.image %}
+          <div class="form-group current-image-box">
+            <label class="form-label">Current Category Image</label>
+            <div class="current-img-preview-row">
+              <img src="{{ category.image.url }}" alt="{{ category.name }}" class="manager-thumb-img">
+              <button type="submit" formaction="{% url 'products:manager_category_image_delete' category_id=category.id %}" formmethod="POST" class="btn btn-danger btn-sm" onclick="return confirm('Delete this category image?');">
+                🗑️ Delete Image
+              </button>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label">{% if is_edit and category.image %}Replace Category Banner Image{% else %}Category Banner Image{% endif %}</label>
+          {{ form.image }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-checkbox-label">
+            {{ form.is_active }} <span>Active Category</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-gold btn-full">
+          {% if is_edit %}Update Category{% else %}Create Category{% endif %}
+        </button>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

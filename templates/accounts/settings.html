@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Settings — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container" style="max-width: 600px;">
+    
+    <div style="margin-bottom: 2rem;">
+      <a href="{% url 'accounts:profile' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Profile</a>
+      <h2 style="margin-top: 0.5rem;">⚙️ Account Settings</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">Customize your store notifications, theme, and language preferences.</p>
+    </div>
+
+    <div class="card" style="padding: 2rem; display: grid; gap: 1.5rem;">
+      <div>
+        <h3 style="font-size: 1rem; color: var(--gold-primary); margin-bottom: 0.75rem;">Email Notifications</h3>
+        <label style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; cursor: pointer; margin-bottom: 0.5rem;">
+          <input type="checkbox" checked> Receive order status updates & tracking notifications
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; cursor: pointer;">
+          <input type="checkbox" checked> Exclusive luxury new arrival drop alerts
+        </label>
+      </div>
+
+      <div style="padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="font-size: 1rem; color: var(--gold-primary); margin-bottom: 0.75rem;">Interface Theme</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">You can toggle between Dark, Light, or Automatic System Theme using the option in your three-dot profile menu.</p>
+      </div>
+
+      <div style="padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="font-size: 1rem; color: var(--gold-primary); margin-bottom: 0.75rem;">Account Role</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Current Role: <strong>{{ user.get_role_display }}</strong>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Damaged Product Refund Claim — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container" style="max-width: 650px;">
+    
+    <a href="{% url 'orders:detail' order_id=order.order_id %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Order Details</a>
+    <h2 style="margin-top: 0.5rem; margin-bottom: 0.5rem;">Submit Damaged Product Refund Claim</h2>
+    <div style="color: var(--accent-red); font-size: 0.85rem; font-weight: 600; margin-bottom: 2rem;">
+      ⏱️ Policy Claim Window: {{ hours_left }} Hours Remaining to Submit Video Evidence
+    </div>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 2rem;">
+      
+      <!-- POLICY WARNING BANNER -->
+      <div style="background-color: rgba(239,68,68,0.08); border: 1px solid var(--accent-red); padding: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: #F87171; line-height: 1.6;">
+        <strong>⚠️ MANDATORY POLICY REQUIREMENT:</strong><br>
+        1. An <strong>unboxing video</strong> (starting from unopened package) is MANDATORY.<br>
+        2. Claim must be filed within 24 hours of delivery.<br>
+        3. Clear photo evidence of the damaged section is required.
+      </div>
+
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">Order Reference ID</label>
+          <input type="text" value="Order #{{ order.order_id }} (₹{{ order.total_amount }})" class="form-input" disabled style="background-color: #1a1a1a;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Describe Product Damage *</label>
+          <textarea name="damage_description" rows="3" placeholder="Explain the damage observed (e.g. torn seam, stain, broken zipper)..." class="form-textarea" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Link to Unboxing Video (Google Drive, Dropbox, YouTube, etc.)</label>
+          <input type="url" name="unboxing_video_url" placeholder="https://drive.google.com/file/d/..." class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">OR Upload Unboxing Video File (MP4/MOV)</label>
+          <input type="file" name="unboxing_video_file" accept="video/*" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Upload Clear Photo Evidence #1 *</label>
+          <input type="file" name="photo_evidence_1" accept="image/*" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Upload Additional Photo Evidence #2 (Optional)</label>
+          <input type="file" name="photo_evidence_2" accept="image/*" class="form-input">
+        </div>
+
+        <!-- EXPLICIT REFUND POLICY ACKNOWLEDGEMENT CHECKBOX -->
+        <div style="background-color: rgba(212,175,55,0.05); border: 1px solid var(--border-gold); padding: 1rem; margin-bottom: 1.5rem;">
+          <label style="display: flex; gap: 0.75rem; align-items: flex-start; cursor: pointer;">
+            <input type="checkbox" name="refund_policy_accepted" class="form-checkbox" style="margin-top: 3px;" required>
+            <span style="font-size: 0.8rem; color: var(--text-main);">
+              I confirm that the attached unboxing video shows the parcel being opened from sealed condition. I understand that claims without video proof will be rejected.
+            </span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; padding: 1rem;">
+          Submit Refund Claim for Verification &rarr;
+        </button>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

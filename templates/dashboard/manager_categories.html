@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Categories — THE VALORY Manager{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container">
+    
+    <div class="dashboard-header-row">
+      <div>
+        <span class="dashboard-subtitle">CATEGORY CONTROL</span>
+        <h2 class="dashboard-title">Product Categories</h2>
+      </div>
+
+      <div class="dashboard-actions-group">
+        <a href="{% url 'products:manager_category_create' %}" class="btn btn-gold btn-sm">+ ADD NEW CATEGORY</a>
+        <a href="{% url 'products:manager_products' %}" class="btn btn-outline btn-sm">📦 MANAGE PRODUCTS</a>
+        {% if user.is_main_admin %}
+          <a href="{% url 'reports:admin_dashboard' %}" class="btn btn-outline btn-sm">EXECUTIVE DASHBOARD &rarr;</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="data-table-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IMAGE</th>
+              <th>CATEGORY NAME</th>
+              <th>SLUG</th>
+              <th>DESCRIPTION</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cat in categories %}
+              <tr>
+                <td>
+                  {% if cat.image %}
+                    <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="table-thumb-img">
+                  {% else %}
+                    <div class="table-thumb-placeholder">NO IMG</div>
+                  {% endif %}
+                </td>
+                <td class="table-name-cell">{{ cat.name }}</td>
+                <td class="table-slug-cell">{{ cat.slug }}</td>
+                <td class="table-desc-cell">{{ cat.description|default:"None" }}</td>
+                <td>
+                  {% if cat.is_active %}
+                    <span class="status-badge status-active">Active</span>
+                  {% else %}
+                    <span class="status-badge status-inactive">Inactive</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="table-action-buttons">
+                    <a href="{% url 'products:manager_category_edit' category_id=cat.id %}" class="btn btn-outline btn-sm">EDIT</a>
+                    <form method="POST" action="{% url 'products:manager_category_delete' category_id=cat.id %}" class="inline-form">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete category \'{{ cat.name|escapejs }}\'?');">🗑️ DELETE</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="table-empty-cell">
+                  No categories created yet.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

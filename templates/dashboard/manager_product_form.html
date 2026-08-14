@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load products_tags %}
+
+{% block title %}{% if is_edit %}Edit Product{% else %}Create Product{% endif %} — THE VALORY{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container" style="max-width: 900px;">
+    
+    <a href="{% url 'products:manager_products' %}" class="back-link">&larr; Back to Product Catalog</a>
+    <h2 class="dashboard-heading">{% if is_edit %}Edit Product: {{ product.name }}{% else %}Create New Apparel Product{% endif %}</h2>
+
+    <div class="dashboard-card">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">SKU *</label>
+            {{ form.sku }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product Unique ID *</label>
+            {{ form.product_id }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Product Title *</label>
+          {{ form.name }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          {{ form.category }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Product Description</label>
+          {{ form.description }}
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Regular Price (INR ₹) *</label>
+            {{ form.price }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Discount Price (INR ₹)</label>
+            {{ form.discount_price }}
+          </div>
+        </div>
+
+        <!-- GARMENT SIZE STOCK MANAGEMENT -->
+        <div class="size-management-block">
+          <h4 class="size-block-title">Configure Garment Sizes & Stock Quantities</h4>
+          <div class="size-input-grid">
+            {% for size_code, size_name in sizes %}
+              <div class="size-input-item">
+                <label class="form-label">Size {{ size_code }}</label>
+                <input type="number" name="size_stock_{{ size_code }}" min="0" value="{% if existing_sizes %}{{ existing_sizes|get_item:size_code|default:0 }}{% else %}15{% endif %}" class="form-input text-center">
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- EXISTING PRODUCT IMAGES WITH DELETE CONTROLS -->
+        {% if is_edit and product.images.all %}
+          <div class="form-group current-image-box">
+            <label class="form-label">Existing Product Photos</label>
+            <div class="manager-images-grid">
+              {% for img in product.images.all %}
+                <div class="manager-img-card">
+                  <img src="{{ img.image.url }}" alt="{{ product.name }}">
+                  <div class="manager-img-card-actions">
+                    {% if img.is_primary %}
+                      <span class="primary-tag">PRIMARY</span>
+                    {% endif %}
+                    <button type="submit" formaction="{% url 'products:manager_product_image_delete' image_id=img.id %}" formmethod="POST" class="btn btn-danger btn-sm" onclick="return confirm('Delete this product photo?');">
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- NEW IMAGE UPLOADS -->
+        <div class="form-group image-upload-block">
+          <label class="form-label">{% if is_edit %}Upload Additional Product Images{% else %}Upload Product Images{% endif %}</label>
+          <input type="file" name="images" multiple accept="image/*" class="form-input">
+          <span class="form-hint">Upload high-resolution fashion photos (JPG, PNG, WebP).</span>
+        </div>
+
+        <div class="checkbox-options-row">
+          <label class="form-checkbox-label">
+            {{ form.is_featured }} <span>Featured Product</span>
+          </label>
+          <label class="form-checkbox-label">
+            {{ form.is_new_arrival }} <span>New Arrival</span>
+          </label>
+          <label class="form-checkbox-label">
+            {{ form.is_active }} <span>Active in Storefront</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-gold btn-full">
+          {% if is_edit %}Update Product Details{% else %}Save & Create Product{% endif %}
+        </button>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

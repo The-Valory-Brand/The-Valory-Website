@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Details #{{ order.order_id }} — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <a href="{% url 'accounts:dashboard' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Dashboard</a>
+        <h2 style="margin-top: 0.5rem;">Order #{{ order.order_id }}</h2>
+      </div>
+
+      <div>
+        <span class="status-badge {% if order.status == 'DELIVERED' %}status-delivered{% elif order.status == 'CANCELLED' %}status-cancelled{% else %}status-dispatched{% endif %}" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+          Status: {{ order.get_status_display }}
+        </span>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem;">
+      
+      <!-- LEFT: ORDER ITEMS -->
+      <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1.75rem;">
+        <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 0.75rem;">Purchased Items</h3>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Size</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order.items.all %}
+                <tr>
+                  <td style="font-weight: 600;">{{ item.product_name }}</td>
+                  <td style="font-size: 0.8rem; color: var(--text-muted);">{{ item.sku }}</td>
+                  <td><span class="status-badge" style="background-color: rgba(212,175,55,0.1); color: var(--gold-primary);">{{ item.size }}</span></td>
+                  <td>₹{{ item.price_at_purchase }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td style="font-weight: 700; color: var(--gold-primary);">₹{{ item.total_price }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if order.can_cancel and user == order.customer %}
+          <div style="margin-top: 2rem; padding: 1.25rem; background-color: rgba(239,68,68,0.05); border: 1px solid var(--accent-red);">
+            <h4 style="color: var(--accent-red); margin-bottom: 0.5rem;">Need to Cancel Your Order?</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+              Your order has not been dispatched yet. Under brand policy, cancellation is permitted only prior to dispatch.
+            </p>
+            <form method="POST" action="{% url 'orders:cancel' order_id=order.order_id %}" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+              {% csrf_token %}
+              <div class="form-group">
+                <input type="text" name="cancellation_reason" placeholder="Reason for cancellation (optional)" class="form-input">
+              </div>
+              <button type="submit" class="btn btn-danger btn-sm">Confirm Pre-Dispatch Cancellation</button>
+            </form>
+          </div>
+        {% elif order.status == 'DISPATCHED' or order.status == 'DELIVERED' %}
+          <div style="margin-top: 2rem; padding: 1.25rem; background-color: rgba(212,175,55,0.05); border: 1px solid var(--border-dark); font-size: 0.85rem; color: var(--text-muted);">
+            ℹ️ <strong>Cancellation Restricted:</strong> This order has already been DISPATCHED/DELIVERED. Under THE VALORY policy, orders cannot be cancelled after dispatch.
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- RIGHT: SHIPPING & PAYMENT SUMMARY -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1.5rem;">
+          <h3 style="margin-bottom: 1rem; font-size: 1rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 0.5rem;">Delivery Destination</h3>
+          <p style="font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem;">{{ order.shipping_full_name }}</p>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Phone: {{ order.shipping_phone }}</p>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">
+            {{ order.shipping_address_line1 }}<br>
+            {% if order.shipping_address_line2 %}{{ order.shipping_address_line2 }}<br>{% endif %}
+            {{ order.city }}, {{ order.state }} - {{ order.postal_code }}
+          </p>
+
+          {% if order.tracking_number %}
+            <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border-dark);">
+              <span style="font-size: 0.75rem; color: var(--gold-primary); text-transform: uppercase;">Courier Tracking Info:</span>
+              <div style="font-weight: 700; color: var(--text-main); font-size: 0.9rem; margin-top: 0.25rem;">
+                {{ order.courier_name }}: {{ order.tracking_number }}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 1.5rem;">
+          <h3 style="margin-bottom: 1rem; font-size: 1rem; border-bottom: 1px solid var(--border-dark); padding-bottom: 0.5rem;">Payment Summary</h3>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.85rem;">
+            <span>Subtotal</span>
+            <span>₹{{ order.subtotal }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; color: var(--text-muted); font-size: 0.85rem;">
+            <span>Shipping</span>
+            <span>₹{{ order.shipping_fee }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; border-top: 1px solid var(--border-dark); padding-top: 0.75rem;">
+            <span>Total Paid</span>
+            <span style="color: var(--gold-primary);">₹{{ order.total_amount }}</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

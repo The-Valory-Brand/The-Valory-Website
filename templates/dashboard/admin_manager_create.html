@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Operational Manager — THE VALORY Admin{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container" style="max-width: 600px;">
+    
+    <a href="{% url 'accounts:list_managers' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Managers</a>
+    <h2 style="margin-top: 0.5rem; margin-bottom: 2rem;">Create Operational Manager Account</h2>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 2rem;">
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          {{ form.full_name }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Manager Email Address *</label>
+          {{ form.email }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          {{ form.phone }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Department / Notes</label>
+          <input type="text" name="department" value="Operations & Fulfillment" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Assign Password *</label>
+          {{ form.password }}
+        </div>
+
+        <div style="margin-bottom: 1.5rem; font-size: 0.8rem; color: var(--text-muted); background-color: rgba(212,175,55,0.05); padding: 0.75rem; border: 1px solid var(--border-dark);">
+          ℹ️ <strong>RBAC Policy Notice:</strong> Manager accounts are granted access to inventory and order fulfillment operations only. Managers are <strong>strictly blocked from viewing revenue, financial analytics, and business reports</strong>.
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; padding: 1rem;">Create Manager Account</button>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

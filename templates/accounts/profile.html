@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container" style="max-width: 650px;">
+    
+    <a href="{% url 'accounts:dashboard' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Dashboard</a>
+    <h2 style="margin-top: 0.5rem; margin-bottom: 2rem;">Edit Personal Profile & Default Address</h2>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 2rem;">
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" name="full_name" value="{{ profile.full_name|default:user.first_name }}" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address (Primary)</label>
+          <input type="email" value="{{ user.email }}" class="form-input" disabled style="background-color: #1a1a1a;">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="text" name="phone" value="{{ user.phone|default:'' }}" class="form-input">
+        </div>
+
+        <div style="border-top: 1px solid var(--border-dark); padding-top: 1.5rem; margin-top: 1.5rem;">
+          <h4 style="margin-bottom: 1rem; color: var(--gold-primary);">Default Shipping Address (Tamil Nadu)</h4>
+
+          <div class="form-group">
+            <label class="form-label">Address Line 1</label>
+            {{ form.shipping_address_line1 }}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Address Line 2</label>
+            {{ form.shipping_address_line2 }}
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">City</label>
+              {{ form.city }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">State</label>
+              {{ form.state }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">PIN Code</label>
+              {{ form.postal_code }}
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; padding: 1rem;">Save Profile Changes</button>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Operational Order Management — THE VALORY Manager{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container">
+    
+    <div class="dashboard-header-row">
+      <div>
+        <span class="dashboard-subtitle">OPERATIONAL PORTAL</span>
+        <h2 class="dashboard-title">Manager Order Fulfillment</h2>
+      </div>
+
+      <div class="dashboard-actions-group">
+        <a href="{% url 'products:manager_products' %}" class="btn btn-outline btn-sm">📦 MANAGE PRODUCTS & STOCK</a>
+        <a href="{% url 'products:manager_categories' %}" class="btn btn-outline btn-sm">🏷️ MANAGE CATEGORIES</a>
+        {% if user.is_main_admin %}
+          <a href="{% url 'reports:admin_dashboard' %}" class="btn btn-gold btn-sm">EXECUTIVE DASHBOARD &rarr;</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- OPERATIONAL WORKFLOW METRICS -->
+    <div class="stats-grid">
+      <div class="stat-card" style="border-left: 3px solid #D4AF37;">
+        <span class="stat-label">Pending Verification</span>
+        <span class="stat-value text-gold">{{ pending_count }}</span>
+      </div>
+      <div class="stat-card" style="border-left: 3px solid #60A5FA;">
+        <span class="stat-label">Processing Orders</span>
+        <span class="stat-value" style="color: #60A5FA;">{{ processing_count }}</span>
+      </div>
+      <div class="stat-card" style="border-left: 3px solid #FBBF24;">
+        <span class="stat-label">Packed & Ready</span>
+        <span class="stat-value" style="color: #FBBF24;">{{ packed_count }}</span>
+      </div>
+      <div class="stat-card" style="border-left: 3px solid #34D399;">
+        <span class="stat-label">Dispatched (Tamil Nadu)</span>
+        <span class="stat-value" style="color: #34D399;">{{ dispatched_count }}</span>
+      </div>
+    </div>
+
+    <!-- SEARCH & FILTER FORM -->
+    <form method="GET" action="{% url 'orders:manager_dashboard' %}" class="dashboard-search-form">
+      <input type="text" name="q" value="{{ search_query }}" placeholder="Search Order ID, Customer Email, Recipient Name..." class="form-input" style="flex: 1; min-width: 260px;">
+      
+      <select name="status" class="form-select" style="width: 220px;">
+        <option value="">All Order Statuses</option>
+        {% for st_val, st_name in status_choices %}
+          <option value="{{ st_val }}" {% if status_filter == st_val %}selected{% endif %}>{{ st_name }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit" class="btn btn-gold btn-sm">FILTER ORDERS</button>
+      <a href="{% url 'orders:manager_dashboard' %}" class="btn btn-outline btn-sm">RESET</a>
+    </form>
+
+    <!-- ORDERS TABLE -->
+    <div class="data-table-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ORDER ID</th>
+              <th>CUSTOMER & PHONE</th>
+              <th>DELIVERY ADDRESS</th>
+              <th>ITEMS</th>
+              <th>STATUS</th>
+              <th>TRACKING INFO</th>
+              <th>UPDATE FULFILLMENT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <td class="table-name-cell">
+                  <a href="{% url 'orders:detail' order_id=order.order_id %}" style="color:var(--gold-primary); text-decoration:underline;">#{{ order.order_id }}</a>
+                  <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">{{ order.created_at|date:"d M Y" }}</div>
+                </td>
+                <td>
+                  <div class="font-bold text-white">{{ order.shipping_full_name }}</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">{{ order.customer.email }}</div>
+                  <div style="font-size: 0.75rem; color: var(--gold-primary); font-weight:600;">{{ order.shipping_phone }}</div>
+                </td>
+                <td style="font-size: 0.8rem; max-width: 220px; line-height:1.4;">
+                  {{ order.shipping_address_line1 }}, {{ order.city }}, {{ order.state }} - {{ order.postal_code }}
+                </td>
+                <td>
+                  <div style="display:flex; flex-direction:column; gap:0.25rem;">
+                    {% for item in order.items.all %}
+                      <span style="font-size: 0.8rem; color:#F5F3EE;">• <strong>{{ item.quantity }}x</strong> {{ item.product_name }} (<span style="color:var(--gold-primary);">{{ item.size }}</span>)</span>
+                    {% endfor %}
+                  </div>
+                </td>
+                <td>
+                  <span class="status-badge {% if order.status == 'DELIVERED' %}status-delivered{% elif order.status == 'CANCELLED' %}status-cancelled{% else %}status-active{% endif %}">
+                    {{ order.get_status_display }}
+                  </span>
+                </td>
+                <td style="font-size: 0.8rem;">
+                  {% if order.tracking_number %}
+                    <strong style="color:#FFFFFF;">{{ order.courier_name }}</strong><br>
+                    <code style="color:var(--gold-primary); font-size:0.75rem;">{{ order.tracking_number }}</code>
+                  {% else %}
+                    <span style="color: var(--text-muted); font-size:0.75rem;">Not Dispatched</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <form method="POST" action="{% url 'orders:manager_update_status' order_id=order.order_id %}" style="display: flex; flex-direction: column; gap: 0.4rem; min-width: 170px;">
+                    {% csrf_token %}
+                    <select name="status" class="form-select" style="padding: 0.35rem 0.5rem; font-size: 0.75rem;">
+                      {% for st_val, st_name in status_choices %}
+                        <option value="{{ st_val }}" {% if order.status == st_val %}selected{% endif %}>{{ st_name }}</option>
+                      {% endfor %}
+                    </select>
+
+                    <input type="text" name="courier_name" value="{{ order.courier_name|default:'Professional Courier (Tamil Nadu)' }}" placeholder="Courier Name" class="form-input" style="padding: 0.35rem 0.5rem; font-size: 0.75rem;">
+                    <input type="text" name="tracking_number" value="{{ order.tracking_number|default:'' }}" placeholder="Tracking Consignment No." class="form-input" style="padding: 0.35rem 0.5rem; font-size: 0.75rem;">
+
+                    <button type="submit" class="btn btn-gold btn-sm" style="padding: 0.35rem 0.5rem; font-size: 0.75rem;">SAVE STATUS</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="table-empty-cell">
+                  No orders match your filter criteria.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

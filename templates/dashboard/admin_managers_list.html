@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Operational Managers Control — THE VALORY Admin{% endblock %}
+
+{% block content %}
+<section class="dashboard-page-wrapper">
+  <div class="container">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+      <div>
+        <a href="{% url 'reports:admin_dashboard' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Executive Dashboard</a>
+        <h2 style="margin-top: 0.5rem;">Operational Manager Accounts</h2>
+      </div>
+
+      <a href="{% url 'accounts:create_manager' %}" class="btn btn-gold btn-sm">+ Create New Manager</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Manager Email</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Assigned By</th>
+            <th>Created Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mgr in managers %}
+            <tr>
+              <td style="font-weight: 600; color: var(--text-main);">{{ mgr.email }}</td>
+              <td>{{ mgr.phone|default:"N/A" }}</td>
+              <td>{{ mgr.manager_profile.department|default:"Operations" }}</td>
+              <td style="font-size: 0.8rem; color: var(--text-muted);">{{ mgr.manager_profile.assigned_by.email|default:"Main Admin" }}</td>
+              <td style="font-size: 0.8rem;">{{ mgr.created_at|date:"M d, Y" }}</td>
+              <td>
+                {% if mgr.is_active %}
+                  <span class="status-badge status-delivered">Active</span>
+                {% else %}
+                  <span class="status-badge status-cancelled">Deactivated</span>
+                {% endif %}
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <a href="{% url 'accounts:edit_manager' manager_id=mgr.id %}" class="btn btn-outline btn-sm" style="color: var(--gold-primary); border-color: var(--gold-primary);">✏️ Edit Account</a>
+                  <form method="POST" action="{% url 'accounts:toggle_manager_status' manager_id=mgr.id %}" style="margin: 0;" onsubmit="return confirm('Change status for manager {{ mgr.email }}?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">
+                      {% if mgr.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                No operational managers created yet. Click "+ Create New Manager" above to assign a manager account.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

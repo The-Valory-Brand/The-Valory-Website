@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recently Viewed — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container">
+    
+    <div style="margin-bottom: 2rem;">
+      <a href="{% url 'accounts:dashboard' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Dashboard</a>
+      <h2 style="margin-top: 0.5rem;">👁 Recently Viewed Products</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">Products you browsed recently.</p>
+    </div>
+
+    <div class="product-grid">
+      {% for rv in recently_viewed %}
+        {% with product=rv.product %}
+          <div class="product-card">
+            <a href="{% url 'products:product_detail' slug=product.slug %}">
+              <div class="product-image-wrap">
+                {% if product.primary_image %}
+                  <img src="{{ product.primary_image }}" alt="{{ product.name }}" class="product-img">
+                {% else %}
+                  <div style="width: 100%; height: 300px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; color: #555;">No Image</div>
+                {% endif %}
+              </div>
+            </a>
+            <div class="product-info">
+              <div style="font-size: 0.75rem; color: var(--gold-primary); text-transform: uppercase;">{{ product.category.name }}</div>
+              <h3 style="font-size: 1rem; margin: 0.25rem 0;"><a href="{% url 'products:product_detail' slug=product.slug %}" style="color: var(--text-main);">{{ product.name }}</a></h3>
+              <div style="font-weight: 700; color: var(--gold-primary);">₹{{ product.current_price }}</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem;">Viewed {{ rv.viewed_at|timesince }} ago</div>
+            </div>
+          </div>
+        {% endwith %}
+      {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 3rem;">
+          You haven't viewed any products recently. Explore our <a href="{% url 'products:shop' %}" style="color: var(--gold-primary);">Shop Catalog</a>.
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

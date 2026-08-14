@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}500 Internal Error — THE VALORY{% endblock %}
+{% block content %}
+<section style="padding: 6rem 0; text-align: center;">
+  <div class="container" style="max-width: 550px;">
+    <div style="font-size: 4rem; color: var(--gold-primary); margin-bottom: 1rem;">⚙️ 500</div>
+    <h2>Internal Server Error</h2>
+    <p style="color: var(--text-muted); margin-top: 1rem; margin-bottom: 2rem;">
+      An unexpected internal system error occurred. Our technical team has been notified.
+    </p>
+    <a href="{% url 'products:home' %}" class="btn btn-gold">Return Home</a>
+  </div>
+</section>
+{% endblock %}

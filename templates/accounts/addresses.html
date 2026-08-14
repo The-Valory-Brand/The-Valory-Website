@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Delivery Addresses — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 3rem 0;">
+  <div class="container">
+    
+    <div style="margin-bottom: 2rem;">
+      <a href="{% url 'accounts:profile' %}" style="color: var(--gold-primary); font-size: 0.85rem;">&larr; Back to Profile</a>
+      <h2 style="margin-top: 0.5rem;">📍 Saved Shipping Addresses</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">Manage your shipping locations across Tamil Nadu for fast one-click checkout.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+      
+      <!-- ADD NEW ADDRESS CARD -->
+      <div class="card" style="padding: 1.5rem; border: 1px dashed var(--gold-primary); background: rgba(212, 175, 55, 0.03);">
+        <h3 style="font-size: 1.1rem; color: var(--gold-primary); margin-bottom: 1rem;">+ Add New Address</h3>
+        <form method="POST" action="{% url 'accounts:add_address' %}">
+          {% csrf_token %}
+          <div style="display: grid; gap: 0.75rem;">
+            <div>
+              <label style="font-size: 0.75rem; color: var(--text-muted);">Full Name *</label>
+              <input type="text" name="full_name" required class="form-control" placeholder="Recipients Full Name">
+            </div>
+
+            <div>
+              <label style="font-size: 0.75rem; color: var(--text-muted);">Phone Number *</label>
+              <input type="tel" name="phone" required class="form-control" placeholder="+91 98765 43210">
+            </div>
+
+            <div>
+              <label style="font-size: 0.75rem; color: var(--text-muted);">Address Line 1 *</label>
+              <input type="text" name="address_line1" required class="form-control" placeholder="House/Flat No, Street Name">
+            </div>
+
+            <div>
+              <label style="font-size: 0.75rem; color: var(--text-muted);">Address Line 2</label>
+              <input type="text" name="address_line2" class="form-control" placeholder="Apartment, Landmark, Area">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+              <div>
+                <label style="font-size: 0.75rem; color: var(--text-muted);">City *</label>
+                <input type="text" name="city" value="Chennai" required class="form-control">
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: var(--text-muted);">District *</label>
+                <input type="text" name="district" value="Chennai" required class="form-control">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+              <div>
+                <label style="font-size: 0.75rem; color: var(--text-muted);">State *</label>
+                <input type="text" name="state" value="Tamil Nadu" required readonly class="form-control" style="background: rgba(255,255,255,0.05);">
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; color: var(--text-muted);">Pincode *</label>
+                <input type="text" name="pincode" required class="form-control" placeholder="600001">
+              </div>
+            </div>
+
+            <div>
+              <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; cursor: pointer;">
+                <input type="checkbox" name="is_default"> Set as default delivery address
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-gold btn-block btn-sm" style="margin-top: 0.5rem;">Save Address</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- EXISTING ADDRESSES -->
+      {% for addr in addresses %}
+        <div class="card" style="padding: 1.5rem; position: relative; border: 1px solid {% if addr.is_default %}var(--gold-primary){% else %}rgba(255,255,255,0.1){% endif %};">
+          {% if addr.is_default %}
+            <span style="position: absolute; top: 1rem; right: 1rem; background: var(--gold-primary); color: #000; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;">Default</span>
+          {% endif %}
+
+          <h3 style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.5rem;">{{ addr.full_name }}</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+            📞 {{ addr.phone }}<br>
+            🏠 {{ addr.address_line1 }}
+            {% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}<br>
+            🏙️ {{ addr.city }}, {{ addr.district }}, {{ addr.state }} - <strong>{{ addr.pincode }}</strong>
+          </p>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+            {% if not addr.is_default %}
+              <form method="POST" action="{% url 'accounts:set_default_address' address_id=addr.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline btn-sm" style="font-size: 0.75rem;">Set Default</button>
+              </form>
+            {% endif %}
+
+            <form method="POST" action="{% url 'accounts:delete_address' address_id=addr.id %}" onsubmit="return confirm('Delete this address?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm" style="font-size: 0.75rem;">Delete</button>
+            </form>
+          </div>
+        </div>
+      {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 2rem;">
+          No saved addresses yet. Fill out the form on the left to add your primary shipping address.
+        </div>
+      {% endfor %}
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

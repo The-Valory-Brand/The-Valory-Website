@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email OTP Verification — THE VALORY{% endblock %}
+
+{% block content %}
+<section style="padding: 4rem 0;">
+  <div class="container" style="max-width: 440px;">
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <div class="subtitle">Security Verification</div>
+      <h2>Enter 6-Digit OTP Code</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">
+        We have sent a verification code to <strong>{{ email }}</strong>. It will expire in 10 minutes.
+      </p>
+    </div>
+
+    <div style="background-color: var(--bg-card); border: 1px solid var(--border-dark); padding: 2rem;">
+      
+      <form method="POST" action="{% url 'accounts:otp_verify' %}">
+        {% csrf_token %}
+
+        <div class="form-group" style="text-align: center;">
+          <label class="form-label">6-Digit Code</label>
+          {{ form.otp_code }}
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; padding: 1rem; font-size: 0.9rem;">
+          Verify OTP Code & Proceed
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-dark);">
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Didn't receive the email code?</p>
+        <a href="{% url 'accounts:resend_otp' %}" class="btn btn-outline btn-sm" style="margin-top: 0.5rem;">Resend OTP Code</a>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+{% endblock %}

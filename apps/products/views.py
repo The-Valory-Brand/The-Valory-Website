@@ -18,8 +18,12 @@ def home_view(request):
     new_arrivals = Product.objects.filter(is_active=True, is_new_arrival=True).prefetch_related('images', 'sizes')[:8]
     categories = Category.objects.filter(is_active=True)
     customer_reviews = Review.objects.filter(is_approved=True, rating__gte=4).select_related('customer', 'product')[:6]
-    hero_banner = SiteBanner.objects.filter(banner_type='HERO').first()
-    story_banner = SiteBanner.objects.filter(banner_type='STORY').first()
+    try:
+        hero_banner = SiteBanner.objects.filter(banner_type='HERO').first()
+        story_banner = SiteBanner.objects.filter(banner_type='STORY').first()
+    except Exception:
+        hero_banner = None
+        story_banner = None
 
     return render(request, 'storefront/index.html', {
         'featured_products': featured_products,
